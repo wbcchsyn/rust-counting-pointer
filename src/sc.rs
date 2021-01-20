@@ -50,3 +50,11 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
+
+/// Bucket of `Sc` to allocate/deallocate memory for reference count and value at once.
+#[repr(C)]
+struct Bucket<T: ?Sized> {
+    count: usize,
+    size: usize,
+    val: T,
+}
