@@ -51,6 +51,8 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#![deny(missing_docs)]
+
 //! `strong-counting-pointer` provides structs `Sc` and `Asc` .
 //! They behave like `std::rc::Rc` and `std::sync::Arc` except for the followings.
 //!
