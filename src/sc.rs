@@ -50,16 +50,3 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
-
-#![deny(missing_docs)]
-
-//! `strong-counting-pointer` provides structs `Sc` and `Asc` .
-//! They behave like `std::rc::Rc` and `std::sync::Arc` except for the followings.
-//!
-//! - `Sc` and `Asc` treats only strong reference but not weak reference.
-//! - `Sc` and `Asc` takes `GlobalAlloc` type as a template parameter.
-//!
-//! It is difficult for `Rc` and `Arc` to achieve both good performance and small memory usage at
-//! the same time. This crate gives up supporting weak reference to do it.
-
-mod sc;
