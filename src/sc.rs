@@ -235,6 +235,30 @@ where
     pub fn as_ptr(this: &Self) -> *const T {
         this.ptr
     }
+
+    /// Returns the number of `Sc` pointers pointing to the same address.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use strong_counting_pointer::Sc;
+    ///
+    /// let five: Sc<i32> = Sc::from(5);
+    /// assert_eq!(1, Sc::count(&five));
+    ///
+    /// let _also_five = five.clone();
+    /// assert_eq!(2, Sc::count(&five));
+    /// assert_eq!(2, Sc::count(&_also_five));
+    ///
+    /// drop(five);
+    /// assert_eq!(1, Sc::count(&_also_five));
+    /// ```
+    pub fn count(this: &Self) -> usize {
+        unsafe {
+            let val = &mut *this.ptr;
+            *Bucket::count(val)
+        }
+    }
 }
 
 #[cfg(test)]
