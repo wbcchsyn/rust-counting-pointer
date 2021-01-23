@@ -257,6 +257,17 @@ where
     }
 }
 
+impl<T: ?Sized, A> fmt::Display for Sc<T, A>
+where
+    T: fmt::Display,
+    A: GlobalAlloc,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let inner: &T = self.deref();
+        fmt::Display::fmt(inner, f)
+    }
+}
+
 impl<T: ?Sized, A> AsRef<T> for Sc<T, A>
 where
     A: GlobalAlloc,
