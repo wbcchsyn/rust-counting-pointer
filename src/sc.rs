@@ -57,6 +57,7 @@ use core::mem::{self, align_of, size_of, MaybeUninit};
 use core::ops::Deref;
 use core::result::Result;
 use std::alloc::{handle_alloc_error, System};
+use std::borrow::Borrow;
 use std::fmt;
 
 /// Bucket of `Sc` to allocate/deallocate memory for reference count and value at once.
@@ -261,6 +262,15 @@ where
     A: GlobalAlloc,
 {
     fn as_ref(&self) -> &T {
+        self.deref()
+    }
+}
+
+impl<T: ?Sized, A> Borrow<T> for Sc<T, A>
+where
+    A: GlobalAlloc,
+{
+    fn borrow(&self) -> &T {
         self.deref()
     }
 }
