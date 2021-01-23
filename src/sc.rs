@@ -269,6 +269,13 @@ where
     }
 }
 
+impl<T: ?Sized, A> Eq for Sc<T, A>
+where
+    T: Eq,
+    A: GlobalAlloc,
+{
+}
+
 impl<T: ?Sized, A> fmt::Display for Sc<T, A>
 where
     T: fmt::Display,
