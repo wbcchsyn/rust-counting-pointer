@@ -53,8 +53,9 @@
 
 use core::alloc::{GlobalAlloc, Layout};
 use core::any::Any;
-use core::mem::{align_of, size_of};
+use core::mem::{self, align_of, size_of, MaybeUninit};
 use core::ops::Deref;
+use core::result::Result;
 use std::alloc::{handle_alloc_error, System};
 use std::fmt;
 
@@ -399,6 +400,48 @@ where
     }
 }
 
+impl<A> Sc<dyn Any, A>
+where
+    A: GlobalAlloc,
+{
+    /// Attempts to downcast the `Sc<dyn Any, A>` to a concrete type.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::alloc::System;
+    /// use std::any::Any;
+    /// use strong_counting_pointer::Sc;
+    ///
+    /// let sc = Sc::new_any(8 as i32, System);
+    ///
+    /// let success = Sc::downcast::<i32>(sc.clone()).unwrap();
+    /// assert_eq!(8, *success);
+    ///
+    /// let fail = Sc::downcast::<String>(sc.clone());
+    /// assert_eq!(true, fail.is_err());
+    /// ```
+    pub fn downcast<T: Any>(self) -> Result<Sc<T, A>, Self> {
+        let val: &mut dyn Any = unsafe { &mut *self.ptr };
+        match val.downcast_mut() {
+            None => Err(self),
+            Some(t) => unsafe {
+                let mut alloc = MaybeUninit::<A>::uninit();
+                let ptr = alloc.as_mut_ptr();
+
+                ptr.copy_from_nonoverlapping(&self.alloc, 1);
+                mem::forget(self);
+                let sc = Sc::<T, A> {
+                    ptr: t as *mut T,
+                    alloc: alloc.assume_init(),
+                };
+
+                Ok(sc)
+            },
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -431,5 +474,18 @@ mod tests {
         {
             let _mr = Sc::make_mut(&mut data);
         }
+    }
+
+    #[test]
+    fn downcast() {
+        let inner = GBox::from(8);
+
+        let sc = Sc::new_any(inner, GAlloc::default());
+
+        let ok = Sc::downcast::<GBox<i32>>(sc.clone());
+        assert_eq!(true, ok.is_ok());
+
+        let fail = Sc::downcast::<String>(sc.clone());
+        assert_eq!(true, fail.is_err());
     }
 }
