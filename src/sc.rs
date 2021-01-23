@@ -153,6 +153,24 @@ where
     }
 }
 
+impl<T: ?Sized, A> Clone for Sc<T, A>
+where
+    A: Clone + GlobalAlloc,
+{
+    fn clone(&self) -> Self {
+        // increment the count.
+        unsafe {
+            let val = &mut *self.ptr;
+            *Bucket::count(val) += 1;
+        };
+
+        Self {
+            ptr: self.ptr,
+            alloc: self.alloc.clone(),
+        }
+    }
+}
+
 impl<T, A> Sc<T, A>
 where
     A: GlobalAlloc,
@@ -205,5 +223,13 @@ mod tests {
     fn new() {
         let five = GBox::from(5);
         let _five = Sc::new(five, GAlloc::default());
+    }
+
+    #[test]
+    fn clone() {
+        let five = GBox::from(5);
+
+        let five = Sc::new(five, GAlloc::default());
+        let _cloned = five.clone();
     }
 }
