@@ -53,6 +53,7 @@
 
 use core::alloc::{GlobalAlloc, Layout};
 use core::mem::{align_of, size_of};
+use core::ops::Deref;
 use std::alloc::{handle_alloc_error, System};
 
 /// Bucket of `Sc` to allocate/deallocate memory for reference count and value at once.
@@ -162,6 +163,17 @@ where
             ptr: &mut bucket.val,
             alloc,
         }
+    }
+}
+
+impl<T: ?Sized, A> Deref for Sc<T, A>
+where
+    A: GlobalAlloc,
+{
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        unsafe { &*self.ptr }
     }
 }
 
