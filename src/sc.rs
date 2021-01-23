@@ -290,6 +290,24 @@ where
             None
         }
     }
+
+    /// Returns `true` if the two `Sc` instances point to the same address, or `false` .
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use strong_counting_pointer::Sc;
+    ///
+    /// let five: Sc<i32> = Sc::from(5);
+    /// let same_five = five.clone();
+    /// let other_five: Sc<i32> = Sc::from(5);
+    ///
+    /// assert_eq!(true, Sc::ptr_eq(&five, &same_five));
+    /// assert_eq!(false, Sc::ptr_eq(&five, &other_five));
+    /// ```
+    pub fn ptr_eq(this: &Self, other: &Self) -> bool {
+        Sc::as_ptr(this) == Sc::as_ptr(other)
+    }
 }
 
 impl<T: Clone, A: Clone> Sc<T, A>
