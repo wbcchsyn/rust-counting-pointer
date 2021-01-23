@@ -207,6 +207,54 @@ where
             alloc,
         }
     }
+
+    /// Creates a new instance of `Sc<[T], A>` .
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::alloc::System;
+    /// use strong_counting_pointer::Sc;
+    ///
+    /// let vals: [i32; 4] = [0, 1, 2, 3];
+    /// let sc = Sc::from_slice_and_alloc(&vals, System);
+    /// assert_eq!(&vals, &*sc);
+    /// ```
+    pub fn from_slice_and_alloc(vals: &[T], alloc: A) -> Sc<[T], A>
+    where
+        T: Clone,
+    {
+        unsafe {
+            let layout = {
+                let align = align_of::<Bucket<T>>();
+                let size = size_of::<Bucket<T>>() - size_of::<Bucket<T>>()
+                    + vals.len() * size_of::<Bucket<T>>();
+                Layout::from_size_align_unchecked(size, align)
+            };
+
+            let ptr = alloc.alloc(layout) as *mut Bucket<T>;
+            if ptr.is_null() {
+                handle_alloc_error(layout);
+            }
+
+            let mut bucket = &mut *ptr;
+            bucket.count = 1;
+            bucket.size = layout.size();
+
+            let ptr = &mut bucket.val as *mut T;
+            for i in 0..vals.len() {
+                let v = vals[i].clone();
+                let ptr = ptr.add(i);
+                ptr.write(v);
+            }
+
+            let slice_ref = core::slice::from_raw_parts_mut(ptr, vals.len());
+            Sc::<[T], A> {
+                ptr: &mut *slice_ref,
+                alloc,
+            }
+        }
+    }
 }
 
 impl<A> Sc<dyn Any, A>
@@ -614,5 +662,12 @@ mod tests {
 
         let sc = Sc::new(inner, GAlloc::default());
         let _any = Sc::to_any(sc);
+    }
+
+    #[test]
+    fn from_slice_and_alloc() {
+        let inners: [GBox<i32>; 2] = [GBox::from(6), GBox::from(4)];
+
+        let _sc = Sc::from_slice_and_alloc(&inners, GAlloc::default());
     }
 }
