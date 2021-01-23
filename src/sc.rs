@@ -396,6 +396,19 @@ where
     pub fn ptr_eq(this: &Self, other: &Self) -> bool {
         Sc::as_ptr(this) == Sc::as_ptr(other)
     }
+
+    fn decouple(this: Self) -> (*mut T, A) {
+        let alloc = unsafe {
+            let mut alloc = MaybeUninit::<A>::uninit();
+            let ptr = alloc.as_mut_ptr();
+            ptr.copy_from_nonoverlapping(&this.alloc, 1);
+            alloc.assume_init()
+        };
+
+        let ret = (this.ptr, alloc);
+        mem::forget(this);
+        ret
+    }
 }
 
 impl<T: Clone, A: Clone> Sc<T, A>
