@@ -259,6 +259,37 @@ where
             *Bucket::count(val)
         }
     }
+
+    /// Returns a mutable reference into the given `Sc` , if no other `Sc` instance is pointing to
+    /// the same address; otherwise returns `None` .
+    ///
+    /// See also [`make_mut`] , which will `clone` the inner value when some other `Sc` instances
+    /// are.
+    ///
+    /// [`make_mut`]: #method.make_mut
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use strong_counting_pointer::Sc;
+    ///
+    /// let mut x: Sc<i32> = Sc::from(3);
+    /// assert_eq!(3, *x);
+    ///
+    /// *Sc::get_mut(&mut x).unwrap() = 4;
+    /// assert_eq!(4, *x);
+    ///
+    /// let _y = x.clone();
+    /// let n = Sc::get_mut(&mut x);
+    /// assert!(n.is_none());
+    /// ```
+    pub fn get_mut(this: &mut Self) -> Option<&mut T> {
+        if Self::count(this) == 1 {
+            Some(unsafe { &mut *this.ptr })
+        } else {
+            None
+        }
+    }
 }
 
 #[cfg(test)]
