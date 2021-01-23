@@ -80,4 +80,10 @@ impl<T: ?Sized> Bucket<T> {
         let ptr = ptr.sub(2);
         &mut *ptr
     }
+
+    unsafe fn size(ptr: *const T) -> usize {
+        let ptr: *const usize = ptr.cast();
+        let ptr = ptr.sub(1);
+        *ptr
+    }
 }
