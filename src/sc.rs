@@ -289,6 +289,18 @@ where
     }
 }
 
+impl<T: ?Sized, A> Ord for Sc<T, A>
+where
+    T: Ord,
+    A: GlobalAlloc,
+{
+    fn cmp(&self, other: &Self) -> Ordering {
+        let this: &T = self.borrow();
+        let other: &T = other.borrow();
+        this.cmp(other)
+    }
+}
+
 impl<T: ?Sized, A> fmt::Display for Sc<T, A>
 where
     T: fmt::Display,
