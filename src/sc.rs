@@ -53,7 +53,7 @@
 
 use core::alloc::{GlobalAlloc, Layout};
 use core::mem::{align_of, size_of};
-use std::alloc::System;
+use std::alloc::{handle_alloc_error, System};
 
 /// Bucket of `Sc` to allocate/deallocate memory for reference count and value at once.
 #[repr(C)]
@@ -130,5 +130,49 @@ where
                 self.alloc.dealloc(ptr, layout);
             }
         }
+    }
+}
+
+impl<T, A> Sc<T, A>
+where
+    A: GlobalAlloc,
+{
+    /// Creates a new instance.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::alloc::System;
+    /// use strong_counting_pointer::Sc;
+    ///
+    /// let _five = Sc::new(5, System);
+    /// ```
+    pub fn new(val: T, alloc: A) -> Self {
+        let bucket = unsafe {
+            let layout = Layout::new::<Bucket<T>>();
+            let ptr = alloc.alloc(layout) as *mut Bucket<T>;
+            if ptr.is_null() {
+                handle_alloc_error(layout);
+            }
+
+            ptr.write(Bucket::from(val));
+            &mut *ptr
+        };
+        Self {
+            ptr: &mut bucket.val,
+            alloc,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use gharial::{GAlloc, GBox};
+
+    #[test]
+    fn new() {
+        let five = GBox::from(5);
+        let _five = Sc::new(five, GAlloc::default());
     }
 }
