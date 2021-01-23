@@ -134,6 +134,16 @@ where
     }
 }
 
+impl<T, A> Default for Sc<T, A>
+where
+    T: Default,
+    A: Default + GlobalAlloc,
+{
+    fn default() -> Self {
+        Self::new(T::default(), A::default())
+    }
+}
+
 impl<T, A> Sc<T, A>
 where
     A: GlobalAlloc,
