@@ -285,20 +285,8 @@ where
     where
         T: Any,
     {
-        unsafe {
-            let mut alloc = MaybeUninit::<A>::uninit();
-            let ptr = alloc.as_mut_ptr();
-
-            ptr.copy_from_nonoverlapping(&this.alloc, 1);
-
-            let ret = Sc::<dyn Any, A> {
-                ptr: this.ptr as *mut dyn Any,
-                alloc: alloc.assume_init(),
-            };
-            mem::forget(this);
-
-            ret
-        }
+        let (ptr, alloc) = Self::decouple(this);
+        Sc::<dyn Any, A> { ptr, alloc }
     }
 }
 
@@ -473,19 +461,13 @@ where
         let val: &mut dyn Any = unsafe { &mut *self.ptr };
         match val.downcast_mut() {
             None => Err(self),
-            Some(t) => unsafe {
-                let mut alloc = MaybeUninit::<A>::uninit();
-                let ptr = alloc.as_mut_ptr();
-
-                ptr.copy_from_nonoverlapping(&self.alloc, 1);
-                mem::forget(self);
-                let sc = Sc::<T, A> {
+            Some(t) => {
+                let (_, alloc) = Self::decouple(self);
+                Ok(Sc::<T, A> {
                     ptr: t as *mut T,
-                    alloc: alloc.assume_init(),
-                };
-
-                Ok(sc)
-            },
+                    alloc,
+                })
+            }
         }
     }
 }
