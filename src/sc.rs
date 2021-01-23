@@ -51,10 +51,24 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+use core::mem::{align_of, size_of};
+
 /// Bucket of `Sc` to allocate/deallocate memory for reference count and value at once.
 #[repr(C)]
 struct Bucket<T: ?Sized> {
     count: usize,
     size: usize,
     val: T,
+}
+
+impl<T> From<T> for Bucket<T> {
+    fn from(val: T) -> Self {
+        debug_assert_eq!(align_of::<usize>(), align_of::<Self>());
+
+        Self {
+            count: 1,
+            size: size_of::<Self>(),
+            val,
+        }
+    }
 }
