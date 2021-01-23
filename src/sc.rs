@@ -214,6 +214,29 @@ where
     }
 }
 
+impl<T: ?Sized, A> Sc<T, A>
+where
+    A: GlobalAlloc,
+{
+    /// Provides a raw pointer to the data.
+    ///
+    /// The counts are not affected in any way and the `Sc` is not consumed. The pointer is valid
+    /// for as long as another `Sc` instance is pointing to the address.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use strong_counting_pointer::Sc;
+    ///
+    /// let x: Sc<String> = Sc::from(String::from("Hello"));
+    /// let x_ptr = Sc::as_ptr(&x);
+    /// assert_eq!("Hello", unsafe { &*x_ptr });
+    /// ```
+    pub fn as_ptr(this: &Self) -> *const T {
+        this.ptr
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
