@@ -52,6 +52,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 use core::alloc::{GlobalAlloc, Layout};
+use core::any::Any;
 use core::mem::{align_of, size_of};
 use core::ops::Deref;
 use std::alloc::{handle_alloc_error, System};
@@ -186,6 +187,41 @@ where
     /// let _five = Sc::new(5, System);
     /// ```
     pub fn new(val: T, alloc: A) -> Self {
+        let bucket = unsafe {
+            let layout = Layout::new::<Bucket<T>>();
+            let ptr = alloc.alloc(layout) as *mut Bucket<T>;
+            if ptr.is_null() {
+                handle_alloc_error(layout);
+            }
+
+            ptr.write(Bucket::from(val));
+            &mut *ptr
+        };
+        Self {
+            ptr: &mut bucket.val,
+            alloc,
+        }
+    }
+}
+
+impl<A> Sc<dyn Any, A>
+where
+    A: GlobalAlloc,
+{
+    /// Creates `Sc<dyn Any>` instance.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::alloc::System;
+    /// use strong_counting_pointer::Sc;
+    ///
+    /// let _five = Sc::new_any(5, System);
+    /// ```
+    pub fn new_any<T>(val: T, alloc: A) -> Self
+    where
+        T: Any,
+    {
         let bucket = unsafe {
             let layout = Layout::new::<Bucket<T>>();
             let ptr = alloc.alloc(layout) as *mut Bucket<T>;
