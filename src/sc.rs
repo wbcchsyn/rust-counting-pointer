@@ -56,6 +56,7 @@ use core::any::Any;
 use core::mem::{align_of, size_of};
 use core::ops::Deref;
 use std::alloc::{handle_alloc_error, System};
+use std::fmt;
 
 /// Bucket of `Sc` to allocate/deallocate memory for reference count and value at once.
 #[repr(C)]
@@ -236,6 +237,21 @@ where
             ptr: &mut bucket.val,
             alloc,
         }
+    }
+}
+
+impl<T: ?Sized, A> fmt::Debug for Sc<T, A>
+where
+    A: fmt::Debug + GlobalAlloc,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let ptr = format!("{:p}", self.ptr);
+        let alloc = format!("{:?}", self.alloc);
+
+        f.debug_struct("Sc")
+            .field("ptr", &ptr)
+            .field("alloc", &alloc)
+            .finish()
     }
 }
 
