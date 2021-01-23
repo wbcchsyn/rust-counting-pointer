@@ -54,6 +54,7 @@
 use core::alloc::{GlobalAlloc, Layout};
 use core::any::Any;
 use core::cmp::Ordering;
+use core::hash::{Hash, Hasher};
 use core::mem::{self, align_of, size_of, MaybeUninit};
 use core::ops::Deref;
 use core::result::Result;
@@ -298,6 +299,20 @@ where
         let this: &T = self.borrow();
         let other: &T = other.borrow();
         this.cmp(other)
+    }
+}
+
+impl<T: ?Sized, A> Hash for Sc<T, A>
+where
+    T: Hash,
+    A: GlobalAlloc,
+{
+    fn hash<H>(&self, hasher: &mut H)
+    where
+        H: Hasher,
+    {
+        let inner: &T = self.borrow();
+        inner.hash(hasher);
     }
 }
 
