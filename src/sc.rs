@@ -257,6 +257,18 @@ where
     }
 }
 
+impl<T: ?Sized, A> PartialEq for Sc<T, A>
+where
+    T: PartialEq,
+    A: GlobalAlloc,
+{
+    fn eq(&self, other: &Self) -> bool {
+        let this: &T = self.borrow();
+        let other: &T = other.borrow();
+        this.eq(other)
+    }
+}
+
 impl<T: ?Sized, A> fmt::Display for Sc<T, A>
 where
     T: fmt::Display,
