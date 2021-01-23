@@ -51,7 +51,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-use core::alloc::GlobalAlloc;
+use core::alloc::{GlobalAlloc, Layout};
 use core::mem::{align_of, size_of};
 use std::alloc::System;
 
@@ -110,4 +110,25 @@ where
 {
     ptr: *mut T,
     alloc: A,
+}
+
+impl<T: ?Sized, A> Drop for Sc<T, A>
+where
+    A: GlobalAlloc,
+{
+    fn drop(&mut self) {
+        unsafe {
+            let count = Bucket::count(&mut *self.ptr);
+            *count -= 1;
+
+            if *count == 0 {
+                let layout =
+                    Layout::from_size_align(Bucket::size(self.ptr), align_of::<usize>()).unwrap();
+                let ptr = Bucket::dealloc_ptr(self.ptr);
+
+                self.ptr.drop_in_place();
+                self.alloc.dealloc(ptr, layout);
+            }
+        }
+    }
 }
