@@ -51,7 +51,9 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+use core::alloc::GlobalAlloc;
 use core::mem::{align_of, size_of};
+use std::alloc::System;
 
 /// Bucket of `Sc` to allocate/deallocate memory for reference count and value at once.
 #[repr(C)]
@@ -92,4 +94,20 @@ impl<T: ?Sized> Bucket<T> {
         let ptr = ptr.sub(2);
         ptr as *mut u8
     }
+}
+
+/// A single-threaded strong reference-counting pointer. 'Sc' stands for 'Strong Counted.'
+///
+/// It behaves like `std::rc::Rc` , except for this treats only strong pointer, but not weak
+/// pointer. The performance of `Sc` is better than `std::rc::Rc` to give up weak pointer.
+///
+/// The inherent methods of `Sc` are all associated funcitons, which means that you have to call
+/// them as e.g., `Sc::get_mut(&mut value)` instead of `value.get_mut()` . This avoids conflicts
+/// with methods of the inner type `T` .
+pub struct Sc<T: ?Sized, A = System>
+where
+    A: GlobalAlloc,
+{
+    ptr: *mut T,
+    alloc: A,
 }
