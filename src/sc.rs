@@ -267,6 +267,41 @@ where
     }
 }
 
+impl<T, A> Sc<T, A>
+where
+    A: GlobalAlloc,
+{
+    /// Consumes `this`, returning `Sc<dyn Any, A>`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use strong_counting_pointer::Sc;
+    ///
+    /// let sc: Sc<i32> = Sc::from(6);
+    /// let any = Sc::to_any(sc);
+    /// ```
+    pub fn to_any(this: Self) -> Sc<dyn Any, A>
+    where
+        T: Any,
+    {
+        unsafe {
+            let mut alloc = MaybeUninit::<A>::uninit();
+            let ptr = alloc.as_mut_ptr();
+
+            ptr.copy_from_nonoverlapping(&this.alloc, 1);
+
+            let ret = Sc::<dyn Any, A> {
+                ptr: this.ptr as *mut dyn Any,
+                alloc: alloc.assume_init(),
+            };
+            mem::forget(this);
+
+            ret
+        }
+    }
+}
+
 impl<T: ?Sized, A> Sc<T, A>
 where
     A: GlobalAlloc,
@@ -487,5 +522,13 @@ mod tests {
 
         let fail = Sc::downcast::<String>(sc.clone());
         assert_eq!(true, fail.is_err());
+    }
+
+    #[test]
+    fn to_any() {
+        let inner = GBox::from(6);
+
+        let sc = Sc::new(inner, GAlloc::default());
+        let _any = Sc::to_any(sc);
     }
 }
