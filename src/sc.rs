@@ -256,6 +256,15 @@ where
     }
 }
 
+impl<T: ?Sized, A> AsRef<T> for Sc<T, A>
+where
+    A: GlobalAlloc,
+{
+    fn as_ref(&self) -> &T {
+        self.deref()
+    }
+}
+
 impl<T: ?Sized, A> Deref for Sc<T, A>
 where
     A: GlobalAlloc,
