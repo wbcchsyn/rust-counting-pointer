@@ -86,4 +86,10 @@ impl<T: ?Sized> Bucket<T> {
         let ptr = ptr.sub(1);
         *ptr
     }
+
+    unsafe fn dealloc_ptr(ptr: *mut T) -> *mut u8 {
+        let ptr: *mut usize = ptr.cast();
+        let ptr = ptr.sub(2);
+        ptr as *mut u8
+    }
 }
