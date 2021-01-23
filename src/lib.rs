@@ -63,3 +63,5 @@
 //! the same time. This crate gives up supporting weak reference to do it.
 
 mod sc;
+
+pub use sc::Sc;
