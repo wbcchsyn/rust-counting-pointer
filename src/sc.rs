@@ -292,6 +292,43 @@ where
     }
 }
 
+impl<T: Clone, A: Clone> Sc<T, A>
+where
+    A: GlobalAlloc,
+{
+    /// Makes a mutable reference into the given `Sc` .
+    ///
+    /// If another `Sc` instance is pointing to the same address, `make_mut` will `clone` the inner
+    /// value to a new allocation to ensure unique ownership.
+    ///
+    /// See also [`get_mut`] , which will fail rather than cloning.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use strong_counting_pointer::Sc;
+    ///
+    /// let mut data: Sc<i32> = Sc::from(5);
+    /// assert_eq!(5, *data);
+    ///
+    /// *Sc::make_mut(&mut data) += 1; // Won't clone anything.
+    /// assert_eq!(6, *data);
+    ///
+    /// let mut data2 = data.clone();  // Won't clone the inner data.
+    /// *Sc::make_mut(&mut data) += 1; // Clones inner data.
+    /// assert_eq!(7, *data);
+    /// assert_eq!(6, *data2);
+    /// ```
+    pub fn make_mut(this: &mut Self) -> &mut T {
+        if Self::count(this) != 1 {
+            let val: &T = this.deref();
+            *this = Sc::new(val.clone(), this.alloc.clone());
+        }
+
+        unsafe { &mut *this.ptr }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -309,5 +346,20 @@ mod tests {
 
         let five = Sc::new(five, GAlloc::default());
         let _cloned = five.clone();
+    }
+
+    #[test]
+    fn make_mut() {
+        let inner = GBox::from(5);
+
+        let mut data = Sc::new(inner, GAlloc::default());
+        {
+            let _mr = Sc::make_mut(&mut data);
+        }
+
+        let _data2 = data.clone();
+        {
+            let _mr = Sc::make_mut(&mut data);
+        }
     }
 }
