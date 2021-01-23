@@ -72,3 +72,12 @@ impl<T> From<T> for Bucket<T> {
         }
     }
 }
+
+impl<T: ?Sized> Bucket<T> {
+    unsafe fn count(val: &mut T) -> &mut usize {
+        let ptr: *mut T = val;
+        let ptr: *mut usize = ptr.cast();
+        let ptr = ptr.sub(2);
+        &mut *ptr
+    }
+}
