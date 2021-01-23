@@ -144,6 +144,15 @@ where
     }
 }
 
+impl<T, A> From<T> for Sc<T, A>
+where
+    A: Default + GlobalAlloc,
+{
+    fn from(val: T) -> Self {
+        Self::new(val, A::default())
+    }
+}
+
 impl<T, A> Sc<T, A>
 where
     A: GlobalAlloc,
