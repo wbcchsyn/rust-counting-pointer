@@ -53,6 +53,7 @@
 
 use core::alloc::{GlobalAlloc, Layout};
 use core::any::Any;
+use core::cmp::Ordering;
 use core::mem::{self, align_of, size_of, MaybeUninit};
 use core::ops::Deref;
 use core::result::Result;
@@ -274,6 +275,18 @@ where
     T: Eq,
     A: GlobalAlloc,
 {
+}
+
+impl<T: ?Sized, A> PartialOrd for Sc<T, A>
+where
+    T: PartialOrd,
+    A: GlobalAlloc,
+{
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        let this: &T = self.borrow();
+        let other: &T = other.borrow();
+        this.partial_cmp(other)
+    }
 }
 
 impl<T: ?Sized, A> fmt::Display for Sc<T, A>
