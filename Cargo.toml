@@ -4,9 +4,12 @@ version = "0.1.0"
 authors = ["Yoshida Shin <wbcchsyn@gmail.com>"]
 edition = "2018"
 
+description = """
+Provides structs of reference counting pointers. The perforance is better than 'std::rc::Rc' and than 'std::sync::Arc' by counting only the strong references but not weak the references.
+"""
+
 license = "LGPL-3.0-or-later OR Apache-2.0 OR BSD-2-Clause"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 
