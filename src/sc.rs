@@ -2,20 +2,20 @@
 //
 // "LGPL-3.0-or-later OR Apache-2.0 OR BSD-2-Clause"
 //
-// This is part of strong-counting-pointer
+// This is part of counting-pointer
 //
-//  strong-counting-pointer is free software: you can redistribute it and/or modify
+//  counting-pointer is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
 //
-//  strong-counting-pointer is distributed in the hope that it will be useful,
+//  counting-pointer is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU Lesser General Public License for more details.
 //
 //  You should have received a copy of the GNU Lesser General Public License
-//  along with strong-counting-pointer.  If not, see <http://www.gnu.org/licenses/>.
+//  along with counting-pointer.  If not, see <http://www.gnu.org/licenses/>.
 //
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -197,7 +197,7 @@ where
     ///
     /// ```
     /// use std::alloc::System;
-    /// use strong_counting_pointer::Sc;
+    /// use counting_pointer::Sc;
     ///
     /// let _five = Sc::new(5, System);
     /// ```
@@ -224,7 +224,7 @@ where
     ///
     /// ```
     /// use std::alloc::System;
-    /// use strong_counting_pointer::Sc;
+    /// use counting_pointer::Sc;
     ///
     /// let vals: [i32; 4] = [0, 1, 2, 3];
     /// let sc = Sc::from_slice_and_alloc(&vals, System);
@@ -277,7 +277,7 @@ where
     ///
     /// ```
     /// use std::alloc::System;
-    /// use strong_counting_pointer::Sc;
+    /// use counting_pointer::Sc;
     ///
     /// let _five = Sc::new_any(5, System);
     /// ```
@@ -423,7 +423,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use strong_counting_pointer::Sc;
+    /// use counting_pointer::Sc;
     ///
     /// let sc: Sc<i32> = Sc::from(6);
     /// let any = Sc::to_any(sc);
@@ -449,7 +449,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use strong_counting_pointer::Sc;
+    /// use counting_pointer::Sc;
     ///
     /// let x: Sc<String> = Sc::from(String::from("Hello"));
     /// let x_ptr = Sc::as_ptr(&x);
@@ -464,7 +464,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use strong_counting_pointer::Sc;
+    /// use counting_pointer::Sc;
     ///
     /// let five: Sc<i32> = Sc::from(5);
     /// assert_eq!(1, Sc::count(&five));
@@ -494,7 +494,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use strong_counting_pointer::Sc;
+    /// use counting_pointer::Sc;
     ///
     /// let mut x: Sc<i32> = Sc::from(3);
     /// assert_eq!(3, *x);
@@ -519,7 +519,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use strong_counting_pointer::Sc;
+    /// use counting_pointer::Sc;
     ///
     /// let five: Sc<i32> = Sc::from(5);
     /// let same_five = five.clone();
@@ -560,7 +560,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use strong_counting_pointer::Sc;
+    /// use counting_pointer::Sc;
     ///
     /// let mut data: Sc<i32> = Sc::from(5);
     /// assert_eq!(5, *data);
@@ -594,7 +594,7 @@ where
     /// ```
     /// use std::alloc::System;
     /// use std::any::Any;
-    /// use strong_counting_pointer::Sc;
+    /// use counting_pointer::Sc;
     ///
     /// let sc = Sc::new_any(8 as i32, System);
     ///

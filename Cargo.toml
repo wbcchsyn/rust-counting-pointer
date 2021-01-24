@@ -1,5 +1,5 @@
 [package]
-name = "strong-counting-pointer"
+name = "counting-pointer"
 version = "0.1.0"
 authors = ["Yoshida Shin <wbcchsyn@gmail.com>"]
 edition = "2018"
