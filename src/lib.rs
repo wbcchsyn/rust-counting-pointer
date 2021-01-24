@@ -2,20 +2,20 @@
 //
 // "LGPL-3.0-or-later OR Apache-2.0 OR BSD-2-Clause"
 //
-// This is part of strong-counting-pointer
+// This is part of counting-pointer
 //
-//  strong-counting-pointer is free software: you can redistribute it and/or modify
+//  counting-pointer is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
 //
-//  strong-counting-pointer is distributed in the hope that it will be useful,
+//  counting-pointer is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU Lesser General Public License for more details.
 //
 //  You should have received a copy of the GNU Lesser General Public License
-//  along with strong-counting-pointer.  If not, see <http://www.gnu.org/licenses/>.
+//  along with counting-pointer.  If not, see <http://www.gnu.org/licenses/>.
 //
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,7 +53,7 @@
 
 #![deny(missing_docs)]
 
-//! `strong-counting-pointer` provides structs `Sc` and `Asc` .
+//! `counting-pointer` provides structs `Sc` and `Asc` .
 //! They behave like `std::rc::Rc` and `std::sync::Arc` except for the followings.
 //!
 //! - `Sc` and `Asc` treats only strong reference but not weak reference.
