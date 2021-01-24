@@ -132,6 +132,20 @@ where
     alloc: A,
 }
 
+unsafe impl<T: ?Sized, A> Sync for Asc<T, A>
+where
+    T: Send + Sync,
+    A: Sync + GlobalAlloc,
+{
+}
+
+unsafe impl<T: ?Sized, A> Send for Asc<T, A>
+where
+    T: Send + Sync,
+    A: Send + GlobalAlloc,
+{
+}
+
 impl<T: ?Sized, A> Drop for Asc<T, A>
 where
     A: GlobalAlloc,
