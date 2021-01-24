@@ -58,6 +58,7 @@ use core::hash::{Hash, Hasher};
 use core::mem::{self, align_of, size_of, MaybeUninit};
 use core::ops::Deref;
 use core::result::Result;
+use core::sync::atomic::{AtomicUsize, Ordering};
 use std::alloc::{handle_alloc_error, System};
 use std::borrow::Borrow;
 use std::fmt;
@@ -65,7 +66,7 @@ use std::fmt;
 /// Bucket of `Asc` to allocate/deallocate memory for reference count and value at once.
 #[repr(C)]
 struct Bucket<T: ?Sized> {
-    count: usize,
+    count: AtomicUsize,
     size: usize,
     val: T,
 }
@@ -75,7 +76,7 @@ impl<T> From<T> for Bucket<T> {
         debug_assert_eq!(align_of::<usize>(), align_of::<Self>());
 
         Self {
-            count: 1,
+            count: AtomicUsize::new(1),
             size: size_of::<Self>(),
             val,
         }
@@ -83,11 +84,13 @@ impl<T> From<T> for Bucket<T> {
 }
 
 impl<T: ?Sized> Bucket<T> {
-    unsafe fn count(val: &mut T) -> &mut usize {
+    unsafe fn count(val: &mut T) -> &AtomicUsize {
         let ptr: *mut T = val;
         let ptr: *mut usize = ptr.cast();
-        let ptr = ptr.sub(2);
-        &mut *ptr
+        let ptr = ptr.sub(1);
+        let ptr: *const AtomicUsize = ptr.cast();
+        let ptr = ptr.sub(1);
+        &*ptr
     }
 
     unsafe fn size(ptr: *const T) -> usize {
@@ -98,7 +101,9 @@ impl<T: ?Sized> Bucket<T> {
 
     unsafe fn dealloc_ptr(ptr: *mut T) -> *mut u8 {
         let ptr: *mut usize = ptr.cast();
-        let ptr = ptr.sub(2);
+        let ptr = ptr.sub(1);
+        let ptr: *const AtomicUsize = ptr.cast();
+        let ptr = ptr.sub(1);
         ptr as *mut u8
     }
 }
@@ -125,10 +130,9 @@ where
 {
     fn drop(&mut self) {
         unsafe {
-            let count = Bucket::count(&mut *self.ptr);
-            *count -= 1;
+            let count = Bucket::count(&mut *self.ptr).fetch_sub(1, Ordering::Release);
 
-            if *count == 0 {
+            if count == 1 {
                 let layout =
                     Layout::from_size_align(Bucket::size(self.ptr), align_of::<usize>()).unwrap();
                 let ptr = Bucket::dealloc_ptr(self.ptr);
@@ -177,7 +181,7 @@ where
         // increment the count.
         unsafe {
             let val = &mut *self.ptr;
-            *Bucket::count(val) += 1;
+            Bucket::count(val).fetch_add(1, Ordering::Acquire);
         };
 
         Self {
@@ -248,7 +252,7 @@ where
             }
 
             let mut bucket = &mut *ptr;
-            bucket.count = 1;
+            bucket.count = AtomicUsize::new(1);
             bucket.size = layout.size();
 
             let ptr = &mut bucket.val as *mut T;
@@ -479,7 +483,7 @@ where
     pub fn count(this: &Self) -> usize {
         unsafe {
             let val = &mut *this.ptr;
-            *Bucket::count(val)
+            Bucket::count(val).load(Ordering::Relaxed)
         }
     }
 
