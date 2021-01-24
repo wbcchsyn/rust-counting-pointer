@@ -159,6 +159,16 @@ where
     }
 }
 
+impl<T, A> From<&'_ [T]> for Sc<[T], A>
+where
+    T: Clone,
+    A: Default + GlobalAlloc,
+{
+    fn from(vals: &'_ [T]) -> Self {
+        Sc::<T, A>::from_slice_and_alloc(vals, A::default())
+    }
+}
+
 impl<T: ?Sized, A> Clone for Sc<T, A>
 where
     A: Clone + GlobalAlloc,
