@@ -8,6 +8,8 @@ description = """
 Provides structs of reference counting pointers. The perforance is better than 'std::rc::Rc' and than 'std::sync::Arc' by counting only the strong references but not weak the references.
 """
 
+readme = "README.md"
+
 license = "LGPL-3.0-or-later OR Apache-2.0 OR BSD-2-Clause"
 
 
