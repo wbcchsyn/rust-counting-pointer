@@ -557,6 +557,8 @@ where
     ///
     /// See also [`get_mut`] , which will fail rather than cloning.
     ///
+    /// [`get_mut`]: #method.get_mut
+    ///
     /// # Examples
     ///
     /// ```
