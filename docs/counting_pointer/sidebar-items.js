@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Asc","A thread-safe strong reference-counting pointer. 'Asc' stands for 'Atomic Strong Counted.'"],["Sc","A single-threaded strong reference-counting pointer. 'Sc' stands for 'Strong Counted.'"]]});
