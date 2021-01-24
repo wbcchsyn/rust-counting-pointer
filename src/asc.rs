@@ -53,7 +53,7 @@
 
 use core::alloc::{GlobalAlloc, Layout};
 use core::any::Any;
-use core::cmp::Ordering;
+use core::cmp;
 use core::hash::{Hash, Hasher};
 use core::mem::{self, align_of, size_of, MaybeUninit};
 use core::ops::Deref;
@@ -341,7 +341,7 @@ where
     T: PartialOrd,
     A: GlobalAlloc,
 {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
         let this: &T = self.borrow();
         let other: &T = other.borrow();
         this.partial_cmp(other)
@@ -353,7 +353,7 @@ where
     T: Ord,
     A: GlobalAlloc,
 {
-    fn cmp(&self, other: &Self) -> Ordering {
+    fn cmp(&self, other: &Self) -> cmp::Ordering {
         let this: &T = self.borrow();
         let other: &T = other.borrow();
         this.cmp(other)
