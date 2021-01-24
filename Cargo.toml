@@ -4,9 +4,18 @@ version = "0.1.0"
 authors = ["Yoshida Shin <wbcchsyn@gmail.com>"]
 edition = "2018"
 
+description = """
+Provides structs of reference counting pointers. The perforance is better than 'std::rc::Rc' and than 'std::sync::Arc' by counting only the strong references but not weak the references.
+"""
+
+readme = "README.md"
+categories = ["asynchronous", "memory-management"]
+keywords = ["rc", "arc", "reference-count"]
+
 license = "LGPL-3.0-or-later OR Apache-2.0 OR BSD-2-Clause"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+repository = "https://github.com/wbcchsyn/rust-counting-pointer.git"
+documentation = "https://wbcchsyn.github.io/rust-counting-pointer/counting_pointer/index.html"
 
 [dependencies]
 
