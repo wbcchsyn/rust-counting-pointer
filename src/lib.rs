@@ -62,6 +62,8 @@
 //! It is difficult for `Rc` and `Arc` to achieve both good performance and small memory usage at
 //! the same time. This crate gives up supporting weak reference to do it.
 
+mod asc;
 mod sc;
 
+pub use asc::Asc;
 pub use sc::Sc;
