@@ -108,14 +108,22 @@ impl<T: ?Sized> Bucket<T> {
     }
 }
 
-/// A single-threaded strong reference-counting pointer. 'Asc' stands for 'Strong Counted.'
+/// A thread-safe strong reference-counting pointer. 'Asc' stands for 'Atomic Strong Counted.'
 ///
-/// It behaves like `std::rc::Rc` , except for this treats only strong pointer, but not weak
-/// pointer. The performance of `Asc` is better than `std::rc::Rc` to give up weak pointer.
+/// It behaves like `std::Sync::Arc` , except for this treats only strong pointer, but not weak
+/// pointer. The performance of `Asc` is better than `std::sync::Arc` to give up weak pointer.
 ///
 /// The inherent methods of `Asc` are all associated funcitons, which means that you have to call
 /// them as e.g., `Asc::get_mut(&mut value)` instead of `value.get_mut()` . This avoids conflicts
 /// with methods of the inner type `T` .
+///
+/// # Thread Safety
+///
+/// Unlike [`Sc`] , `Asc` uses atomic operations for its reference counting. This means that it is
+/// thread-safe. The disadvangate is that atomic operations are more expensive than ordinary memory
+/// access.
+///
+/// [`Sc`]: struct.Sc.html
 pub struct Asc<T: ?Sized, A = System>
 where
     A: GlobalAlloc,
