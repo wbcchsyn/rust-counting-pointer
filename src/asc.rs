@@ -62,7 +62,7 @@ use std::alloc::{handle_alloc_error, System};
 use std::borrow::Borrow;
 use std::fmt;
 
-/// Bucket of `Sc` to allocate/deallocate memory for reference count and value at once.
+/// Bucket of `Asc` to allocate/deallocate memory for reference count and value at once.
 #[repr(C)]
 struct Bucket<T: ?Sized> {
     count: usize,
@@ -103,15 +103,15 @@ impl<T: ?Sized> Bucket<T> {
     }
 }
 
-/// A single-threaded strong reference-counting pointer. 'Sc' stands for 'Strong Counted.'
+/// A single-threaded strong reference-counting pointer. 'Asc' stands for 'Strong Counted.'
 ///
 /// It behaves like `std::rc::Rc` , except for this treats only strong pointer, but not weak
-/// pointer. The performance of `Sc` is better than `std::rc::Rc` to give up weak pointer.
+/// pointer. The performance of `Asc` is better than `std::rc::Rc` to give up weak pointer.
 ///
-/// The inherent methods of `Sc` are all associated funcitons, which means that you have to call
-/// them as e.g., `Sc::get_mut(&mut value)` instead of `value.get_mut()` . This avoids conflicts
+/// The inherent methods of `Asc` are all associated funcitons, which means that you have to call
+/// them as e.g., `Asc::get_mut(&mut value)` instead of `value.get_mut()` . This avoids conflicts
 /// with methods of the inner type `T` .
-pub struct Sc<T: ?Sized, A = System>
+pub struct Asc<T: ?Sized, A = System>
 where
     A: GlobalAlloc,
 {
@@ -119,7 +119,7 @@ where
     alloc: A,
 }
 
-impl<T: ?Sized, A> Drop for Sc<T, A>
+impl<T: ?Sized, A> Drop for Asc<T, A>
 where
     A: GlobalAlloc,
 {
@@ -140,7 +140,7 @@ where
     }
 }
 
-impl<T, A> Default for Sc<T, A>
+impl<T, A> Default for Asc<T, A>
 where
     T: Default,
     A: Default + GlobalAlloc,
@@ -150,7 +150,7 @@ where
     }
 }
 
-impl<T, A> From<T> for Sc<T, A>
+impl<T, A> From<T> for Asc<T, A>
 where
     A: Default + GlobalAlloc,
 {
@@ -159,17 +159,17 @@ where
     }
 }
 
-impl<T, A> From<&'_ [T]> for Sc<[T], A>
+impl<T, A> From<&'_ [T]> for Asc<[T], A>
 where
     T: Clone,
     A: Default + GlobalAlloc,
 {
     fn from(vals: &'_ [T]) -> Self {
-        Sc::<T, A>::from_slice_and_alloc(vals, A::default())
+        Asc::<T, A>::from_slice_and_alloc(vals, A::default())
     }
 }
 
-impl<T: ?Sized, A> Clone for Sc<T, A>
+impl<T: ?Sized, A> Clone for Asc<T, A>
 where
     A: Clone + GlobalAlloc,
 {
@@ -187,7 +187,7 @@ where
     }
 }
 
-impl<T, A> Sc<T, A>
+impl<T, A> Asc<T, A>
 where
     A: GlobalAlloc,
 {
@@ -197,9 +197,9 @@ where
     ///
     /// ```
     /// use std::alloc::System;
-    /// use strong_counting_pointer::Sc;
+    /// use strong_counting_pointer::Asc;
     ///
-    /// let _five = Sc::new(5, System);
+    /// let _five = Asc::new(5, System);
     /// ```
     pub fn new(val: T, alloc: A) -> Self {
         let bucket = unsafe {
@@ -218,19 +218,19 @@ where
         }
     }
 
-    /// Creates a new instance of `Sc<[T], A>` .
+    /// Creates a new instance of `Asc<[T], A>` .
     ///
     /// # Examples
     ///
     /// ```
     /// use std::alloc::System;
-    /// use strong_counting_pointer::Sc;
+    /// use strong_counting_pointer::Asc;
     ///
     /// let vals: [i32; 4] = [0, 1, 2, 3];
-    /// let sc = Sc::from_slice_and_alloc(&vals, System);
+    /// let sc = Asc::from_slice_and_alloc(&vals, System);
     /// assert_eq!(&vals, &*sc);
     /// ```
-    pub fn from_slice_and_alloc(vals: &[T], alloc: A) -> Sc<[T], A>
+    pub fn from_slice_and_alloc(vals: &[T], alloc: A) -> Asc<[T], A>
     where
         T: Clone,
     {
@@ -259,7 +259,7 @@ where
             }
 
             let slice_ref = core::slice::from_raw_parts_mut(ptr, vals.len());
-            Sc::<[T], A> {
+            Asc::<[T], A> {
                 ptr: &mut *slice_ref,
                 alloc,
             }
@@ -267,19 +267,19 @@ where
     }
 }
 
-impl<A> Sc<dyn Any, A>
+impl<A> Asc<dyn Any, A>
 where
     A: GlobalAlloc,
 {
-    /// Creates `Sc<dyn Any>` instance.
+    /// Creates `Asc<dyn Any>` instance.
     ///
     /// # Examples
     ///
     /// ```
     /// use std::alloc::System;
-    /// use strong_counting_pointer::Sc;
+    /// use strong_counting_pointer::Asc;
     ///
-    /// let _five = Sc::new_any(5, System);
+    /// let _five = Asc::new_any(5, System);
     /// ```
     pub fn new_any<T>(val: T, alloc: A) -> Self
     where
@@ -302,7 +302,7 @@ where
     }
 }
 
-impl<T: ?Sized, A> fmt::Debug for Sc<T, A>
+impl<T: ?Sized, A> fmt::Debug for Asc<T, A>
 where
     A: fmt::Debug + GlobalAlloc,
 {
@@ -310,14 +310,14 @@ where
         let ptr = format!("{:p}", self.ptr);
         let alloc = format!("{:?}", self.alloc);
 
-        f.debug_struct("Sc")
+        f.debug_struct("Asc")
             .field("ptr", &ptr)
             .field("alloc", &alloc)
             .finish()
     }
 }
 
-impl<T: ?Sized, A> PartialEq for Sc<T, A>
+impl<T: ?Sized, A> PartialEq for Asc<T, A>
 where
     T: PartialEq,
     A: GlobalAlloc,
@@ -329,14 +329,14 @@ where
     }
 }
 
-impl<T: ?Sized, A> Eq for Sc<T, A>
+impl<T: ?Sized, A> Eq for Asc<T, A>
 where
     T: Eq,
     A: GlobalAlloc,
 {
 }
 
-impl<T: ?Sized, A> PartialOrd for Sc<T, A>
+impl<T: ?Sized, A> PartialOrd for Asc<T, A>
 where
     T: PartialOrd,
     A: GlobalAlloc,
@@ -348,7 +348,7 @@ where
     }
 }
 
-impl<T: ?Sized, A> Ord for Sc<T, A>
+impl<T: ?Sized, A> Ord for Asc<T, A>
 where
     T: Ord,
     A: GlobalAlloc,
@@ -360,7 +360,7 @@ where
     }
 }
 
-impl<T: ?Sized, A> Hash for Sc<T, A>
+impl<T: ?Sized, A> Hash for Asc<T, A>
 where
     T: Hash,
     A: GlobalAlloc,
@@ -374,7 +374,7 @@ where
     }
 }
 
-impl<T: ?Sized, A> fmt::Display for Sc<T, A>
+impl<T: ?Sized, A> fmt::Display for Asc<T, A>
 where
     T: fmt::Display,
     A: GlobalAlloc,
@@ -385,7 +385,7 @@ where
     }
 }
 
-impl<T: ?Sized, A> AsRef<T> for Sc<T, A>
+impl<T: ?Sized, A> AsRef<T> for Asc<T, A>
 where
     A: GlobalAlloc,
 {
@@ -394,7 +394,7 @@ where
     }
 }
 
-impl<T: ?Sized, A> Borrow<T> for Sc<T, A>
+impl<T: ?Sized, A> Borrow<T> for Asc<T, A>
 where
     A: GlobalAlloc,
 {
@@ -403,7 +403,7 @@ where
     }
 }
 
-impl<T: ?Sized, A> Deref for Sc<T, A>
+impl<T: ?Sized, A> Deref for Asc<T, A>
 where
     A: GlobalAlloc,
 {
@@ -414,67 +414,67 @@ where
     }
 }
 
-impl<T, A> Sc<T, A>
+impl<T, A> Asc<T, A>
 where
     A: GlobalAlloc,
 {
-    /// Consumes `this`, returning `Sc<dyn Any, A>`
+    /// Consumes `this`, returning `Asc<dyn Any, A>`
     ///
     /// # Examples
     ///
     /// ```
-    /// use strong_counting_pointer::Sc;
+    /// use strong_counting_pointer::Asc;
     ///
-    /// let sc: Sc<i32> = Sc::from(6);
-    /// let any = Sc::to_any(sc);
+    /// let sc: Asc<i32> = Asc::from(6);
+    /// let any = Asc::to_any(sc);
     /// ```
-    pub fn to_any(this: Self) -> Sc<dyn Any, A>
+    pub fn to_any(this: Self) -> Asc<dyn Any, A>
     where
         T: Any,
     {
         let (ptr, alloc) = Self::decouple(this);
-        Sc::<dyn Any, A> { ptr, alloc }
+        Asc::<dyn Any, A> { ptr, alloc }
     }
 }
 
-impl<T: ?Sized, A> Sc<T, A>
+impl<T: ?Sized, A> Asc<T, A>
 where
     A: GlobalAlloc,
 {
     /// Provides a raw pointer to the data.
     ///
-    /// The counts are not affected in any way and the `Sc` is not consumed. The pointer is valid
-    /// for as long as another `Sc` instance is pointing to the address.
+    /// The counts are not affected in any way and the `Asc` is not consumed. The pointer is valid
+    /// for as long as another `Asc` instance is pointing to the address.
     ///
     /// # Examples
     ///
     /// ```
-    /// use strong_counting_pointer::Sc;
+    /// use strong_counting_pointer::Asc;
     ///
-    /// let x: Sc<String> = Sc::from(String::from("Hello"));
-    /// let x_ptr = Sc::as_ptr(&x);
+    /// let x: Asc<String> = Asc::from(String::from("Hello"));
+    /// let x_ptr = Asc::as_ptr(&x);
     /// assert_eq!("Hello", unsafe { &*x_ptr });
     /// ```
     pub fn as_ptr(this: &Self) -> *const T {
         this.ptr
     }
 
-    /// Returns the number of `Sc` pointers pointing to the same address.
+    /// Returns the number of `Asc` pointers pointing to the same address.
     ///
     /// # Examples
     ///
     /// ```
-    /// use strong_counting_pointer::Sc;
+    /// use strong_counting_pointer::Asc;
     ///
-    /// let five: Sc<i32> = Sc::from(5);
-    /// assert_eq!(1, Sc::count(&five));
+    /// let five: Asc<i32> = Asc::from(5);
+    /// assert_eq!(1, Asc::count(&five));
     ///
     /// let _also_five = five.clone();
-    /// assert_eq!(2, Sc::count(&five));
-    /// assert_eq!(2, Sc::count(&_also_five));
+    /// assert_eq!(2, Asc::count(&five));
+    /// assert_eq!(2, Asc::count(&_also_five));
     ///
     /// drop(five);
-    /// assert_eq!(1, Sc::count(&_also_five));
+    /// assert_eq!(1, Asc::count(&_also_five));
     /// ```
     pub fn count(this: &Self) -> usize {
         unsafe {
@@ -483,10 +483,10 @@ where
         }
     }
 
-    /// Returns a mutable reference into the given `Sc` , if no other `Sc` instance is pointing to
+    /// Returns a mutable reference into the given `Asc` , if no other `Asc` instance is pointing to
     /// the same address; otherwise returns `None` .
     ///
-    /// See also [`make_mut`] , which will `clone` the inner value when some other `Sc` instances
+    /// See also [`make_mut`] , which will `clone` the inner value when some other `Asc` instances
     /// are.
     ///
     /// [`make_mut`]: #method.make_mut
@@ -494,16 +494,16 @@ where
     /// # Examples
     ///
     /// ```
-    /// use strong_counting_pointer::Sc;
+    /// use strong_counting_pointer::Asc;
     ///
-    /// let mut x: Sc<i32> = Sc::from(3);
+    /// let mut x: Asc<i32> = Asc::from(3);
     /// assert_eq!(3, *x);
     ///
-    /// *Sc::get_mut(&mut x).unwrap() = 4;
+    /// *Asc::get_mut(&mut x).unwrap() = 4;
     /// assert_eq!(4, *x);
     ///
     /// let _y = x.clone();
-    /// let n = Sc::get_mut(&mut x);
+    /// let n = Asc::get_mut(&mut x);
     /// assert!(n.is_none());
     /// ```
     pub fn get_mut(this: &mut Self) -> Option<&mut T> {
@@ -514,22 +514,22 @@ where
         }
     }
 
-    /// Returns `true` if the two `Sc` instances point to the same address, or `false` .
+    /// Returns `true` if the two `Asc` instances point to the same address, or `false` .
     ///
     /// # Examples
     ///
     /// ```
-    /// use strong_counting_pointer::Sc;
+    /// use strong_counting_pointer::Asc;
     ///
-    /// let five: Sc<i32> = Sc::from(5);
+    /// let five: Asc<i32> = Asc::from(5);
     /// let same_five = five.clone();
-    /// let other_five: Sc<i32> = Sc::from(5);
+    /// let other_five: Asc<i32> = Asc::from(5);
     ///
-    /// assert_eq!(true, Sc::ptr_eq(&five, &same_five));
-    /// assert_eq!(false, Sc::ptr_eq(&five, &other_five));
+    /// assert_eq!(true, Asc::ptr_eq(&five, &same_five));
+    /// assert_eq!(false, Asc::ptr_eq(&five, &other_five));
     /// ```
     pub fn ptr_eq(this: &Self, other: &Self) -> bool {
-        Sc::as_ptr(this) == Sc::as_ptr(other)
+        Asc::as_ptr(this) == Asc::as_ptr(other)
     }
 
     fn decouple(this: Self) -> (*mut T, A) {
@@ -546,13 +546,13 @@ where
     }
 }
 
-impl<T: Clone, A: Clone> Sc<T, A>
+impl<T: Clone, A: Clone> Asc<T, A>
 where
     A: GlobalAlloc,
 {
-    /// Makes a mutable reference into the given `Sc` .
+    /// Makes a mutable reference into the given `Asc` .
     ///
-    /// If another `Sc` instance is pointing to the same address, `make_mut` will `clone` the inner
+    /// If another `Asc` instance is pointing to the same address, `make_mut` will `clone` the inner
     /// value to a new allocation to ensure unique ownership.
     ///
     /// See also [`get_mut`] , which will fail rather than cloning.
@@ -560,57 +560,57 @@ where
     /// # Examples
     ///
     /// ```
-    /// use strong_counting_pointer::Sc;
+    /// use strong_counting_pointer::Asc;
     ///
-    /// let mut data: Sc<i32> = Sc::from(5);
+    /// let mut data: Asc<i32> = Asc::from(5);
     /// assert_eq!(5, *data);
     ///
-    /// *Sc::make_mut(&mut data) += 1; // Won't clone anything.
+    /// *Asc::make_mut(&mut data) += 1; // Won't clone anything.
     /// assert_eq!(6, *data);
     ///
     /// let mut data2 = data.clone();  // Won't clone the inner data.
-    /// *Sc::make_mut(&mut data) += 1; // Clones inner data.
+    /// *Asc::make_mut(&mut data) += 1; // Clones inner data.
     /// assert_eq!(7, *data);
     /// assert_eq!(6, *data2);
     /// ```
     pub fn make_mut(this: &mut Self) -> &mut T {
         if Self::count(this) != 1 {
             let val: &T = this.deref();
-            *this = Sc::new(val.clone(), this.alloc.clone());
+            *this = Asc::new(val.clone(), this.alloc.clone());
         }
 
         unsafe { &mut *this.ptr }
     }
 }
 
-impl<A> Sc<dyn Any, A>
+impl<A> Asc<dyn Any, A>
 where
     A: GlobalAlloc,
 {
-    /// Attempts to downcast the `Sc<dyn Any, A>` to a concrete type.
+    /// Attempts to downcast the `Asc<dyn Any, A>` to a concrete type.
     ///
     /// # Examples
     ///
     /// ```
     /// use std::alloc::System;
     /// use std::any::Any;
-    /// use strong_counting_pointer::Sc;
+    /// use strong_counting_pointer::Asc;
     ///
-    /// let sc = Sc::new_any(8 as i32, System);
+    /// let sc = Asc::new_any(8 as i32, System);
     ///
-    /// let success = Sc::downcast::<i32>(sc.clone()).unwrap();
+    /// let success = Asc::downcast::<i32>(sc.clone()).unwrap();
     /// assert_eq!(8, *success);
     ///
-    /// let fail = Sc::downcast::<String>(sc.clone());
+    /// let fail = Asc::downcast::<String>(sc.clone());
     /// assert_eq!(true, fail.is_err());
     /// ```
-    pub fn downcast<T: Any>(self) -> Result<Sc<T, A>, Self> {
+    pub fn downcast<T: Any>(self) -> Result<Asc<T, A>, Self> {
         let val: &mut dyn Any = unsafe { &mut *self.ptr };
         match val.downcast_mut() {
             None => Err(self),
             Some(t) => {
                 let (_, alloc) = Self::decouple(self);
-                Ok(Sc::<T, A> {
+                Ok(Asc::<T, A> {
                     ptr: t as *mut T,
                     alloc,
                 })
@@ -627,14 +627,14 @@ mod tests {
     #[test]
     fn new() {
         let five = GBox::from(5);
-        let _five = Sc::new(five, GAlloc::default());
+        let _five = Asc::new(five, GAlloc::default());
     }
 
     #[test]
     fn clone() {
         let five = GBox::from(5);
 
-        let five = Sc::new(five, GAlloc::default());
+        let five = Asc::new(five, GAlloc::default());
         let _cloned = five.clone();
     }
 
@@ -642,14 +642,14 @@ mod tests {
     fn make_mut() {
         let inner = GBox::from(5);
 
-        let mut data = Sc::new(inner, GAlloc::default());
+        let mut data = Asc::new(inner, GAlloc::default());
         {
-            let _mr = Sc::make_mut(&mut data);
+            let _mr = Asc::make_mut(&mut data);
         }
 
         let _data2 = data.clone();
         {
-            let _mr = Sc::make_mut(&mut data);
+            let _mr = Asc::make_mut(&mut data);
         }
     }
 
@@ -657,12 +657,12 @@ mod tests {
     fn downcast() {
         let inner = GBox::from(8);
 
-        let sc = Sc::new_any(inner, GAlloc::default());
+        let sc = Asc::new_any(inner, GAlloc::default());
 
-        let ok = Sc::downcast::<GBox<i32>>(sc.clone());
+        let ok = Asc::downcast::<GBox<i32>>(sc.clone());
         assert_eq!(true, ok.is_ok());
 
-        let fail = Sc::downcast::<String>(sc.clone());
+        let fail = Asc::downcast::<String>(sc.clone());
         assert_eq!(true, fail.is_err());
     }
 
@@ -670,14 +670,14 @@ mod tests {
     fn to_any() {
         let inner = GBox::from(6);
 
-        let sc = Sc::new(inner, GAlloc::default());
-        let _any = Sc::to_any(sc);
+        let sc = Asc::new(inner, GAlloc::default());
+        let _any = Asc::to_any(sc);
     }
 
     #[test]
     fn from_slice_and_alloc() {
         let inners: [GBox<i32>; 2] = [GBox::from(6), GBox::from(4)];
 
-        let _sc = Sc::from_slice_and_alloc(&inners, GAlloc::default());
+        let _sc = Asc::from_slice_and_alloc(&inners, GAlloc::default());
     }
 }
