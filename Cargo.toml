@@ -10,6 +10,7 @@ Provides structs of reference counting pointers. The perforance is better than '
 
 readme = "README.md"
 categories = ["asynchronous", "memory-management"]
+keywords = ["rc", "arc", "reference-count"]
 
 license = "LGPL-3.0-or-later OR Apache-2.0 OR BSD-2-Clause"
 
