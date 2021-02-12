@@ -105,8 +105,8 @@ impl<T: ?Sized> Bucket<T> {
 
 /// A single-threaded strong reference-counting pointer. 'Sc' stands for 'Strong Counted.'
 ///
-/// It behaves like `std::rc::Rc` , except for this treats only strong pointer, but not weak
-/// pointer. The performance of `Sc` is better than `std::rc::Rc` to give up weak pointer.
+/// It behaves like `std::rc::Rc` except for that this treats only strong pointer; i.e. `Sc` gives
+/// up weak pointer for the performance.
 ///
 /// The inherent methods of `Sc` are all associated funcitons, which means that you have to call
 /// them as e.g., `Sc::get_mut(&mut value)` instead of `value.get_mut()` . This avoids conflicts

@@ -110,8 +110,8 @@ impl<T: ?Sized> Bucket<T> {
 
 /// A thread-safe strong reference-counting pointer. 'Asc' stands for 'Atomic Strong Counted.'
 ///
-/// It behaves like `std::Sync::Arc` , except for this treats only strong pointer, but not weak
-/// pointer. The performance of `Asc` is better than `std::sync::Arc` to give up weak pointer.
+/// It behaves like `std::Sync::Arc` except for that this treats only strong pointer; i.e. `Asc`
+/// gives up weak pointer for the performance.
 ///
 /// The inherent methods of `Asc` are all associated funcitons, which means that you have to call
 /// them as e.g., `Asc::get_mut(&mut value)` instead of `value.get_mut()` . This avoids conflicts
