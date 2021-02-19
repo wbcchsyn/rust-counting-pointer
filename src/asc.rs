@@ -558,6 +558,58 @@ where
         Asc::as_ptr(this) == Asc::as_ptr(other)
     }
 
+    /// Consumes `this` , returning the wrapped pointer and the allocator.
+    ///
+    /// To avoid memory leak, the returned pointer must be converted back to an `Sc` using
+    /// [`from_raw_alloc`] .
+    ///
+    /// Using this function and [`from_raw_alloc`] , user can create an `Sc<T: ?Sized>` instance.
+    ///
+    /// [`from_raw_alloc`]: #method.from_raw_alloc
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use counting_pointer::Asc;
+    ///
+    /// let asc: Asc<String> = Asc::from("Foo".to_string());
+    /// let (ptr, alloc) = Asc::into_raw_alloc(asc);
+    /// let _asc: Asc<dyn AsRef<str>> = unsafe { Asc::from_raw_alloc(ptr, alloc) };
+    /// ```
+    pub fn into_raw_alloc(this: Self) -> (*const T, A) {
+        let (ptr, alloc) = Self::decouple(this);
+        (ptr, alloc)
+    }
+
+    /// Constructs a new instance from a raw pointer and allocator.
+    ///
+    /// The raw pointer must have been previously returned by a call to [`into_raw_alloc`] .
+    ///
+    /// Using this function and [`into_raw_alloc`] , user can create an `Sc<T: ?Sized>` instance.
+    ///
+    /// # Safety
+    ///
+    /// It may lead to memory unsafety to use improperly, even if the returned value will never be
+    /// accessed.
+    ///
+    /// [`into_raw_alloc`]: #method.into_raw_alloc
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use counting_pointer::Asc;
+    ///
+    /// let asc: Asc<String> = Asc::from("Foo".to_string());
+    /// let (ptr, alloc) = Asc::into_raw_alloc(asc);
+    /// let _asc: Asc<dyn AsRef<str>> = unsafe { Asc::from_raw_alloc(ptr, alloc) };
+    /// ```
+    pub unsafe fn from_raw_alloc(ptr: *const T, alloc: A) -> Self {
+        Self {
+            ptr: ptr as *mut T,
+            alloc,
+        }
+    }
+
     fn decouple(this: Self) -> (*mut T, A) {
         let alloc = unsafe {
             let mut alloc = MaybeUninit::<A>::uninit();
@@ -707,5 +759,12 @@ mod tests {
         let inners: [GBox<i32>; 2] = [GBox::from(6), GBox::from(4)];
 
         let _sc = Asc::from_slice_alloc(&inners, GAlloc::default());
+    }
+
+    #[test]
+    fn raw_alloc() {
+        let asc: Asc<GBox<i32>> = Asc::from(GBox::from(0));
+        let (ptr, alloc) = Asc::into_raw_alloc(asc);
+        let _sc = unsafe { Asc::from_raw_alloc(ptr, alloc) };
     }
 }
