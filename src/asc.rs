@@ -119,9 +119,9 @@ impl<T: ?Sized> Bucket<T> {
 ///
 /// # Thread Safety
 ///
-/// Unlike [`Sc`] , `Asc` uses atomic operations for its reference counting. This means that it is
-/// thread-safe. The disadvangate is that atomic operations are more expensive than ordinary memory
-/// access.
+/// Unlike to [`Sc`] , `Asc` uses atomic operations for its reference counting. This means that it
+/// is thread-safe. The disadvangate is that atomic operations are more expensive than ordinary
+/// memory access.
 ///
 /// [`Sc`]: struct.Sc.html
 pub struct Asc<T: ?Sized, A = System>
@@ -560,10 +560,10 @@ where
 
     /// Consumes `this` , returning the wrapped pointer and the allocator.
     ///
-    /// To avoid memory leak, the returned pointer must be converted back to an `Sc` using
+    /// To avoid memory leak, the returned pointer must be converted back to an `Asc` using
     /// [`from_raw_alloc`] .
     ///
-    /// Using this function and [`from_raw_alloc`] , user can create an `Sc<T: ?Sized>` instance.
+    /// Using this function and [`from_raw_alloc`] , user can create an `Asc<T: ?Sized>` instance.
     ///
     /// [`from_raw_alloc`]: #method.from_raw_alloc
     ///
@@ -585,7 +585,7 @@ where
     ///
     /// The raw pointer must have been previously returned by a call to [`into_raw_alloc`] .
     ///
-    /// Using this function and [`into_raw_alloc`] , user can create an `Sc<T: ?Sized>` instance.
+    /// Using this function and [`into_raw_alloc`] , user can create an `Asc<T: ?Sized>` instance.
     ///
     /// # Safety
     ///
