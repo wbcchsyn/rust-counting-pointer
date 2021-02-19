@@ -191,7 +191,7 @@ where
     A: Default + GlobalAlloc,
 {
     fn from(vals: &'_ [T]) -> Self {
-        Asc::<T, A>::from_slice_and_alloc(vals, A::default())
+        Asc::<T, A>::from_slice_alloc(vals, A::default())
     }
 }
 
@@ -253,10 +253,10 @@ where
     /// use counting_pointer::Asc;
     ///
     /// let vals: [i32; 4] = [0, 1, 2, 3];
-    /// let sc = Asc::from_slice_and_alloc(&vals, System);
+    /// let sc = Asc::from_slice_alloc(&vals, System);
     /// assert_eq!(&vals, &*sc);
     /// ```
-    pub fn from_slice_and_alloc(vals: &[T], alloc: A) -> Asc<[T], A>
+    pub fn from_slice_alloc(vals: &[T], alloc: A) -> Asc<[T], A>
     where
         T: Clone,
     {
@@ -703,9 +703,9 @@ mod tests {
     }
 
     #[test]
-    fn from_slice_and_alloc() {
+    fn from_slice_alloc() {
         let inners: [GBox<i32>; 2] = [GBox::from(6), GBox::from(4)];
 
-        let _sc = Asc::from_slice_and_alloc(&inners, GAlloc::default());
+        let _sc = Asc::from_slice_alloc(&inners, GAlloc::default());
     }
 }
