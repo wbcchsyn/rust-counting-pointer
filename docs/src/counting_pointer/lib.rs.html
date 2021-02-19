@@ -67,9 +67,6 @@
 <span id="64">64</span>
 <span id="65">65</span>
 <span id="66">66</span>
-<span id="67">67</span>
-<span id="68">68</span>
-<span id="69">69</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright 2020 Shin Yoshida</span>
 <span class="comment">//</span>
@@ -126,14 +123,11 @@
 
 <span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_docs</span>)]</span>
 
-<span class="doccomment">//! `counting-pointer` provides structs `Sc` and `Asc` .</span>
+<span class="doccomment">//! `counting-pointer` provides struct `Sc` and `Asc` .</span>
 <span class="doccomment">//! They behave like `std::rc::Rc` and `std::sync::Arc` except for the followings.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! - `Sc` and `Asc` treats only strong reference but not weak reference.</span>
+<span class="doccomment">//! - `Sc` and `Asc` treats only strong reference but not weak reference for the performance.</span>
 <span class="doccomment">//! - `Sc` and `Asc` takes `GlobalAlloc` type as a template parameter.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! It is difficult for `Rc` and `Arc` to achieve both good performance and small memory usage at</span>
-<span class="doccomment">//! the same time. This crate gives up supporting weak reference to do it.</span>
 
 <span class="kw">mod</span> <span class="ident">asc</span>;
 <span class="kw">mod</span> <span class="ident">sc</span>;
